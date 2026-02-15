@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignLink Pro - Real-time Sign Language Translator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .screen {
+            min-height: 100vh;
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* LOGIN SCREEN */
+        .login-screen {
+            background: linear-gradient(135deg, var(--darker) 0%, #1a1a2e 50%, var(--dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-screen.active {
+            display: flex;
+        }
+
+        .login-bg-shapes {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .login-bg-shapes::before,
+        .login-bg-shapes::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+        }
+
+        .login-bg-shapes::before {
+            width: 600px;
+            height: 600px;
+            background: var(--primary);
+            top: -200px;
+            right: -100px;
+        }
+
+        .login-bg-shapes::after {
+            width: 500px;
+            height: 500px;
+            background: var(--secondary);
+            bottom: -150px;
+            left: -100px;
+        }
+
+        .login-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 600px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            margin: 40px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-branding {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-branding::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .branding-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .brand-logo-icon {
+            width: 64px;
+            height: 64px;
+            background: white;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--primary);
+        }
+
+        .brand-logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .branding-title {
+            font-size: 42px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .branding-desc {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+        }
+
+        .branding-features {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .branding-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .branding-feature i {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .login-form-section {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-form-header {
+            margin-bottom: 40px;
+        }
+
+        .login-form-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--light);
+            margin-bottom: 8px;
+        }
+
+        .login-form-header p {
+            color: var(--gray-400);
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-300);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--darker);
+            border: 2px solid var(--gray-600);
+            border-radius: var(--radius);
+            font-size: 16px;
+            color: var(--light);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-500);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--gray-600);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-500);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray-500);
+            color: var(--gray-300);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .demo-hint {
+            margin-top: 24px;
+            padding: 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: var(--radius);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .demo-hint p {
+            font-size: 14px;
+            color: var(--gray-400);
+        }
+
+        .demo-hint code {
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        /* PROFILE SCREEN */
+        .profile-screen {
+            background: var(--darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .profile-screen.active {
+            display: flex;
+        }
+
+        .profile-container {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .profile-header {
+            margin-bottom: 48px;
+        }
+
+        .profile-header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--light);
+            margin-bottom: 12px;
+        }
+
+        .profile-header p {
+            font-size: 18px;
+            color: var(--gray-400);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .profile-card {
+            background: var(--dark);
+            border: 2px solid transparent;
+            border-radius: var(--radius-lg);
+            padding: 40px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .profile-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+        }
+
+        .profile-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .profile-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--light);
+            margin-bottom: 8px;
+        }
+
+        .profile-card p {
+            font-size: 14px;
+            color: var(--gray-400);
+        }
+
+        /* DASHBOARD */
+        .dashboard-screen {
+            background: var(--darker);
+            min-height: 100vh;
+        }
+
+        .dashboard-screen.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: var(--dark);
+            border-bottom: 1px solid var(--gray-600);
+            padding: 0 40px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dashboard-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .dashboard-logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+        }
+
+        .dashboard-logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--light);
+        }
+
+        .dashboard-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--gray-400);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--light);
+            background: var(--gray-600);
+        }
+
+        .dashboard-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--success) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .user-role {
+            font-size: 13px;
+            color: var(--gray-400);
+        }
+
+        .dashboard-main {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-welcome {
+            margin-bottom: 40px;
+        }
+
+        .dashboard-welcome h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--light);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-welcome p {
+            font-size: 16px;
+            color: var(--gray-400);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--dark);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--gray-600);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .stat-icon.purple {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+        }
+
+        .stat-icon.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .stat-icon.blue {
+            background: rgba(14, 165, 233, 0.15);
+            color: var(--secondary);
+        }
+
+        .stat-icon.orange {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .stat-trend {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--light);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-400);
+        }
+
+        .modes-section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--light);
+        }
+
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .mode-card {
+            background: var(--dark);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-600);
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .mode-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .mode-icon.gradient-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .mode-icon.gradient-2 {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .mode-icon.gradient-3 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .mode-icon.gradient-4 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .mode-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--light);
+            margin-bottom: 8px;
+        }
+
+        .mode-card p {
+            font-size: 14px;
+            color: var(--gray-400);
+            margin-bottom: 16px;
+        }
+
+        .mode-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary-light);
+        }
+
+        .mode-badge.new {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        /* TRANSLATION SCREENS */
+        .translation-screen {
+            background: var(--darker);
+            min-height: 100vh;
+        }
+
+        .translation-screen.active {
+            display: block;
+        }
+
+        .translation-header {
+            background: var(--dark);
+            border-bottom: 1px solid var(--gray-600);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .translation-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .translation-title h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--light);
+        }
+
+        .back-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--gray-600);
+            border: none;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--gray-500);
+        }
+
+        .translation-main {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .video-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 32px;
+        }
+
+        .video-container {
+            background: var(--dark);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--gray-600);
+        }
+
+        .video-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-600);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .video-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .video-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .video-preview {
+            aspect-ratio: 16/9;
+            background: var(--darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: var(--gray-400);
+        }
+
+        .video-placeholder i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            color: var(--gray-500);
+        }
+
+        .video-controls {
+            padding: 20px 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .control-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .control-btn.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .control-btn.secondary {
+            background: var(--gray-600);
+            color: var(--light);
+        }
+
+        .control-btn.secondary:hover {
+            background: var(--gray-500);
+        }
+
+        .sidebar-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .output-panel {
+            background: var(--dark);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-600);
+            flex: 1;
+        }
+
+        .output-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-600);
+        }
+
+        .output-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .output-content {
+            padding: 24px;
+            min-height: 200px;
+        }
+
+        .output-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--light);
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            padding: 12px 16px;
+            background: var(--gray-600);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .history-text {
+            font-size: 14px;
+            color: var(--light);
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+
+        /* VOICE TO SIGN */
+        .voice-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .voice-input-panel {
+            background: var(--dark);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-600);
+            padding: 32px;
+        }
+
+        .voice-input-panel h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--light);
+            margin-bottom: 24px;
+        }
+
+        .voice-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 16px;
+            background: var(--darker);
+            border: 2px solid var(--gray-600);
+            border-radius: var(--radius);
+            font-size: 16px;
+            color: var(--light);
+            resize: vertical;
+            font-family: inherit;
+            margin-bottom: 20px;
+        }
+
+        .voice-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .sign-output-panel {
+            background: var(--dark);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-600);
+            padding: 32px;
+            text-align: center;
+        }
+
+        .sign-avatar {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .sign-output-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--light);
+            margin-bottom: 8px;
+        }
+
+        .sign-output-sub {
+            font-size: 14px;
+            color: var(--gray-400);
+        }
+
+        @media (max-width: 1200px) {
+            .modes-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .login-container {
+                flex-direction: column;
+                margin: 20px;
+            }
+
+            .login-branding {
+                padding: 40px;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .video-section,
+            .voice-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 0 20px;
+            }
+
+            .dashboard-nav {
+                display: none;
+            }
+
+            .dashboard-main {
+                padding: 20px;
+            }
+
+            .modes-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- LOGIN SCREEN -->
+    <div class="screen login-screen active" id="loginScreen">
+        <div class="login-bg-shapes"></div>
+        <div class="login-container">
+            <div class="login-branding">
+                <div class="branding-content">
+                    <div class="brand-logo">
+                        <div class="brand-logo-icon">
+                            <i class="fas fa-hands"></i>
+                        </div>
+                        <div class="brand-logo-text">SignLink Pro</div>
+                    </div>
+                    <h1 class="branding-title">Break Communication Barriers</h1>
+                    <p class="branding-desc">Real-time sign language translation powered by advanced AI. Connect with
+                        anyone, anywhere.</p>
+                    <div class="branding-features">
+                        <div class="branding-feature">
+                            <i class="fas fa-check"></i>
+                            <span>ISL & ASL Support</span>
+                        </div>
+                        <div class="branding-feature">
+                            <i class="fas fa-check"></i>
+                            <span>Real-time Translation</span>
+                        </div>
+                        <div class="branding-feature">
+                            <i class="fas fa-check"></i>
+                            <span>Voice to Sign Conversion</span>
+                        </div>
+                        <div class="branding-feature">
+                            <i class="fas fa-check"></i>
+                            <span>Multi-language Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="login-form-section">
+                <div class="login-form-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to continue to SignLink Pro</p>
+                </div>
+                <form onsubmit="login(event)">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="Enter your email"
+                            value="admin@demo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="loginPass" class="form-input" placeholder="Enter your password"
+                            value="123456">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In
+                    </button>
+                </form>
+                <div class="demo-hint">
+                    <p><i class="fas fa-info-circle"></i> Demo credentials: <code>admin@demo.com</code> /
+                        <code>123456</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE SCREEN -->
+    <div class="screen profile-screen" id="profileScreen">
+        <div class="profile-container">
+            <div class="profile-header">
+                <h1>Select Your Profile</h1>
+                <p>Choose how you'll be using SignLink Pro today</p>
+            </div>
+            <div class="profile-grid">
+                <div class="profile-card" onclick="selectProfile('deaf', this)">
+                    <div class="profile-icon">
+                        <i class="fas fa-ear-deaf"></i>
+                    </div>
+                    <h3>Deaf User</h3>
+                    <p>Convert spoken language to sign language in real-time</p>
+                </div>
+                <div class="profile-card" onclick="selectProfile('hearing', this)">
+                    <div class="profile-icon">
+                        <i class="fas fa-assistive-listening-systems"></i>
+                    </div>
+                    <h3>Hearing User</h3>
+                    <p>Translate sign language to speech and text</p>
+                </div>
+                <div class="profile-card" onclick="selectProfile('interpreter', this)">
+                    <div class="profile-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3>Interpreter</h3>
+                    <p>Professional tools for live interpretation sessions</p>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="max-width: 300px; margin: 0 auto;" onclick="goToDashboard()">
+                Continue to Dashboard
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SCREEN -->
+    <div class="screen dashboard-screen" id="dashboardScreen">
+        <header class="dashboard-header">
+            <div class="dashboard-logo">
+                <div class="dashboard-logo-icon">
+                    <i class="fas fa-hands"></i>
+                </div>
+                <span class="dashboard-logo-text">SignLink Pro</span>
+            </div>
+            <nav class="dashboard-nav">
+                <button class="nav-item active">Dashboard</button>
+                <button class="nav-item">History</button>
+                <button class="nav-item">Settings</button>
+                <button class="nav-item">Help</button>
+            </nav>
+            <div class="dashboard-user">
+                <div class="user-info">
+                    <div class="user-name">John Doe</div>
+                    <div class="user-role" id="userRole">Hearing User</div>
+                </div>
+                <div class="user-avatar" onclick="logout()">JD</div>
+            </div>
+        </header>
+        <main class="dashboard-main">
+            <div class="dashboard-welcome">
+                <h1>Welcome back, John!</h1>
+                <p>Ready to break communication barriers? Choose a mode to get started.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <span class="stat-trend">+12%</span>
+                    </div>
+                    <div class="stat-value">1,247</div>
+                    <div class="stat-label">Translations Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span class="stat-trend">+8%</span>
+                    </div>
+                    <div class="stat-value">4.2h</div>
+                    <div class="stat-label">Active Usage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <span class="stat-trend">+5%</span>
+                    </div>
+                    <div class="stat-value">98.5%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <span class="stat-trend">+20</span>
+                    </div>
+                    <div class="stat-value">156</div>
+                    <div class="stat-label">Words Learned</div>
+                </div>
+            </div>
+            <div class="modes-section">
+                <div class="section-header">
+                    <h2 class="section-title">Translation Modes</h2>
+                </div>
+                <div class="modes-grid">
+                    <div class="mode-card" onclick="startSignToVoice()">
+                        <div class="mode-icon gradient-1">
+                            <i class="fas fa-hands"></i>
+                        </div>
+                        <h3>Sign to Voice</h3>
+                        <p>Convert ISL/ASL signs to spoken language in real-time</p>
+                        <span class="mode-badge">Popular</span>
+                    </div>
+                    <div class="mode-card" onclick="startVoiceToSign()">
+                        <div class="mode-icon gradient-2">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <h3>Voice to Sign</h3>
+                        <p>Transform speech into animated sign language</p>
+                        <span class="mode-badge new">Enhanced</span>
+                    </div>
+                    <div class="mode-card" onclick="startInterpreter()">
+                        <div class="mode-icon gradient-3">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h3>Video Interpreter</h3>
+                        <p>Live video calls with real-time translation overlay</p>
+                        <span class="mode-badge">Pro</span>
+                    </div>
+                    <div class="mode-card" onclick="startPractice()">
+                        <div class="mode-icon gradient-4">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Practice Mode</h3>
+                        <p>Learn and master sign vocabulary with gamification</p>
+                        <span class="mode-badge new">New</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SIGN TO VOICE SCREEN -->
+    <div class="screen translation-screen" id="signToVoiceScreen">
+        <header class="translation-header">
+            <div class="translation-title">
+                <button class="back-btn" onclick="backToDashboard()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Sign to Voice Translation</h1>
+            </div>
+            <div class="dashboard-logo">
+                <div class="dashboard-logo-icon">
+                    <i class="fas fa-hands"></i>
+                </div>
+                <span class="dashboard-logo-text">SignLink Pro</span>
+            </div>
+        </header>
+        <main class="translation-main">
+            <div class="video-section">
+                <div class="video-container">
+                    <div class="video-header">
+                        <h3>Camera Feed</h3>
+                        <div class="video-status">
+                            <span class="status-dot"></span>
+                            <span>Live</span>
+                        </div>
+                    </div>
+                    <div class="video-preview">
+                        <video id="webcam" autoplay muted playsinline
+                            style="display: none; width: 100%; height: 100%; object-fit: cover;"></video>
+                        <canvas id="canvas" style="display: none; width: 100%; height: 100%;"></canvas>
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <i class="fas fa-video"></i>
+                            <p>Click "Start Camera" to begin</p>
+                        </div>
+                    </div>
+                    <div class="video-controls">
+                        <button class="control-btn primary" onclick="toggleCamera()">
+                            <i class="fas fa-camera"></i>
+                            <span id="cameraBtn">Start Camera</span>
+                        </button>
+                        <button class="control-btn secondary" onclick="clearOutput()">
+                            <i class="fas fa-trash"></i>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="sidebar-panel">
+                    <div class="output-panel">
+                        <div class="output-header">
+                            <h3>Translation Output</h3>
+                        </div>
+                        <div class="output-content">
+                            <div class="output-text" id="output">Show your sign to camera...</div>
+                        </div>
+                    </div>
+                    <div class="output-panel">
+                        <div class="output-header">
+                            <h3>Recent Translations</h3>
+                        </div>
+                        <div class="output-content">
+                            <div class="history-list">
+                                <div class="history-item">
+                                    <span class="history-text">Hello</span>
+                                    <span class="history-time">Just now</span>
+                                </div>
+                                <div class="history-item">
+                                    <span class="history-text">Thank you</span>
+                                    <span class="history-time">2 min ago</span>
+                                </div>
+                                <div class="history-item">
+                                    <span class="history-text">Good morning</span>
+                                    <span class="history-time">5 min ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VOICE TO SIGN SCREEN -->
+    <div class="screen translation-screen" id="voiceToSignScreen">
+        <header class="translation-header">
+            <div class="translation-title">
+                <button class="back-btn" onclick="backToDashboard()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Voice to Sign Translation</h1>
+            </div>
+            <div class="dashboard-logo">
+                <div class="dashboard-logo-icon">
+                    <i class="fas fa-hands"></i>
+                </div>
+                <span class="dashboard-logo-text">SignLink Pro</span>
+            </div>
+        </header>
+        <main class="translation-main">
+            <div class="voice-section">
+                <div class="voice-input-panel">
+                    <h3><i class="fas fa-microphone"></i> Voice Input</h3>
+                    <textarea id="voiceInput" class="voice-textarea"
+                        placeholder="Type or speak something... (e.g., 'Hello, how are you?')"></textarea>
+                    <button class="btn btn-primary" onclick="translateVoice()">
+                        <i class="fas fa-magic"></i>
+                        Translate to Sign Language
+                    </button>
+                    <div style="margin-top: 16px;">
+                        <button class="btn btn-secondary" onclick="startVoiceRecognition()" style="width: 100%;">
+                            <i class="fas fa-microphone-alt"></i>
+                            Start Voice Recognition
+                        </button>
+                    </div>
+                </div>
+                <div class="sign-output-panel">
+                    <h3 style="font-size: 18px; font-weight: 600; color: var(--light); margin-bottom: 24px;">
+                        <i class="fas fa-hands"></i> Sign Output
+                    </h3>
+                    <div class="sign-avatar" id="signAvatar">
+                        <i class="fas fa-hand-peace"></i>
+                    </div>
+                    <div class="sign-output-text" id="signText">Ready to translate!</div>
+                    <div class="sign-output-sub">Enter text or speak to see sign animation</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentProfile = null;
+        let cameraRunning = false;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function login(e) {
+            if (e) e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            if (email === 'admin@demo.com' && pass === '123456') {
+                currentUser = { email, name: 'John Doe' };
+                showScreen('profileScreen');
+            } else {
+                alert('Invalid credentials. Use: admin@demo.com / 123456');
+            }
+        }
+
+        function selectProfile(profile, element) {
+            currentProfile = profile;
+            document.querySelectorAll('.profile-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+
+            const roleMap = {
+                'deaf': 'Deaf User',
+                'hearing': 'Hearing User',
+                'interpreter': 'Interpreter'
+            };
+            document.getElementById('userRole').textContent = roleMap[profile] || 'User';
+        }
+
+        function goToDashboard() {
+            if (!currentProfile) {
+                alert('Please select a profile first');
+                return;
+            }
+            showScreen('dashboardScreen');
+        }
+
+        function startSignToVoice() {
+            showScreen('signToVoiceScreen');
+        }
+
+        function startVoiceToSign() {
+            showScreen('voiceToSignScreen');
+        }
+
+        function startInterpreter() {
+            alert('Video Interpreter mode coming in version 2.0!\nThis feature enables real-time video calls with translation overlay.');
+        }
+
+        function startPractice() {
+            alert('Practice Mode coming soon!\nLearn 50+ ISL/ASL words with gamification and progress tracking.');
+        }
+
+        function backToDashboard() {
+            if (cameraRunning) {
+                toggleCamera();
+            }
+            showScreen('dashboardScreen');
+        }
+
+        function logout() {
+            currentUser = null;
+            currentProfile = null;
+            showScreen('loginScreen');
+        }
+
+        function toggleCamera() {
+            cameraRunning = !cameraRunning;
+            const btn = document.getElementById('cameraBtn');
+            const placeholder = document.getElementById('videoPlaceholder');
+            const video = document.getElementById('webcam');
+
+            if (cameraRunning) {
+                btn.textContent = 'Stop Camera';
+                placeholder.style.display = 'none';
+                video.style.display = 'block';
+
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        video.srcObject = stream;
+                    })
+                    .catch(err => {
+                        alert('Camera access denied or not available');
+                        toggleCamera();
+                    });
+            } else {
+                btn.textContent = 'Start Camera';
+                placeholder.style.display = 'flex';
+                video.style.display = 'none';
+
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                }
+            }
+        }
+
+        function clearOutput() {
+            document.getElementById('output').textContent = 'Cleared!';
+            setTimeout(() => {
+                document.getElementById('output').textContent = 'Show your sign to camera...';
+            }, 1000);
+        }
+
+        function translateVoice() {
+            const text = document.getElementById('voiceInput').value || 'Hello';
+            const signText = document.getElementById('signText');
+            const avatar = document.getElementById('signAvatar');
+
+            signText.textContent = 'Translating...';
+            avatar.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            setTimeout(() => {
+                avatar.innerHTML = '<i class="fas fa-hands-clapping"></i>';
+                signText.textContent = `"${text}"`;
+
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = text.match(/[\u0900-\u097F]/) ? 'hi-IN' : 'en-US';
+                    speechSynthesis.speak(utterance);
+                }
+            }, 1200);
+        }
+
+        function startVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.continuous = false;
+
+                recognition.onresult = function (event) {
+                    const text = event.results[0][0].transcript;
+                    document.getElementById('voiceInput').value = text;
+                    translateVoice();
+                };
+
+                recognition.onerror = function () {
+                    alert('Voice recognition error. Please try again.');
+                };
+
+                recognition.start();
+            } else {
+                alert('Voice recognition is not supported in this browser.');
+            }
+        }
+    </script>
+</body>
+
+</html>
